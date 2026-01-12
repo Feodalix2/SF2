@@ -16,8 +16,15 @@ local drawingFontsEnum = {
 }
 
 local function getFontFromIndex(fontIndex)
-	return drawingFontsEnum[fontIndex]
+	local fonts = {
+		Enum.Font.Roboto,
+		Enum.Font.Legacy,
+		Enum.Font.SourceSans,
+		Enum.Font.RobotoMono
+	}
+	return fonts[fontIndex + 1] or Enum.Font.SourceSans
 end
+
 
 local function convertTransparency(transparency)
 	return math.clamp(1 - transparency, 0, 1)
@@ -74,7 +81,7 @@ DrawingLib.Fonts = {
 }
 
 function DrawingLib.new(drawingType)
-	drawingIndex += 1
+	drawingIndex = drawingIndex + 1
 	if drawingType == "Line" then
 		return DrawingLib.createLine()
 	elseif drawingType == "Text" then
@@ -203,12 +210,14 @@ function DrawingLib.createText()
 			if index == "Text" then
 				textLabel.Text = value
 			elseif index == "Font" then
-				textLabel.FontFace = getFontFromIndex(math.clamp(value, 0, 3))
+				textLabel.Font = getFontFromIndex(math.clamp(value, 0, 3))
+				-- textLabel.FontFace = getFontFromIndex(math.clamp(value, 0, 3))
 			elseif index == "Size" then
 				textLabel.TextSize = value
 			elseif index == "Position" then
 				updateTextPosition()
 			elseif index == "Center" then
+				--textLabel.Position = UDim2.fromOffset((value and camera.ViewportSize / 2 or textObj.Position).X, textObj.Position.Y)
 				textLabel.Position = UDim2.fromOffset((value and camera.ViewportSize / 2 or textObj.Position).X, textObj.Position.Y)
 			elseif index == "Outline" then
 				uiStroke.Enabled = value
@@ -657,7 +666,8 @@ function DrawingLib.createScreenGui()
 	} + baseDrawingObj)
 
 	local screenGui = Instance.new("ScreenGui")
-	screenGui.Name = drawingIndex
+	--screenGui.Name = drawingIndex
+    screenGui.Name = tostring(drawingIndex)
 	screenGui.IgnoreGuiInset = screenGuiObj.IgnoreGuiInset
 	screenGui.DisplayOrder = screenGuiObj.DisplayOrder
 	screenGui.ResetOnSpawn = screenGuiObj.ResetOnSpawn
@@ -964,8 +974,8 @@ function drawingFunctions.setrenderproperty(drawingObj, property, value)
 end
 
 function drawingFunctions.cleardrawcache()
-	for _, drawing in drawingUI:GetDescendants() do
-		drawing:Remove()
+	for _, inst in ipairs(drawingUI:GetDescendants()) do
+		inst:Destroy()
 	end
 end
 
